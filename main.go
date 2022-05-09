@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -16,6 +17,7 @@ import (
 // [x] 1. send a HTTP request
 // [x] 2. resolve the request
 // [x] 3. resolve the response
+// [x] 4. input word and format output
 
 func encrypt(s ...string) string {
 	h := md5.New()
@@ -39,7 +41,13 @@ type ResponseBody struct {
 }
 
 func main() {
-	word := "what"
+	if len(os.Args) != 2 {
+		fmt.Println("Wrong number of arguments!")
+		fmt.Println("Usage: translate <word>")
+		fmt.Println("Example: translate hello")
+		return
+	}
+	word := os.Args[1]
 	salt := time.Now().UnixMilli()
 	lts := salt / 10
 	bv := encrypt("5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36")
@@ -88,5 +96,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%#v\n", res)
+	// fmt.Printf("%#v\n", res)
+	fmt.Println(word)
+	entires := res.SmartResult.Entries
+	for _, v := range entires {
+		fmt.Print(v)
+	}
 }
