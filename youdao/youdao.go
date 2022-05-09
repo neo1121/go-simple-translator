@@ -1,4 +1,4 @@
-package main
+package youdao
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"simple-translate/utils"
 	"strings"
 	"time"
 )
@@ -23,11 +24,11 @@ type ResponseBody struct {
 	} `json:"smartResult"`
 }
 
-func youdaoTranslate(word string) {
+func Translate(word string) {
 	salt := time.Now().UnixMilli()
 	lts := salt / 10
-	bv := md5encrypt("5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36")
-	sign := md5encrypt("fanyideskweb", word, fmt.Sprint(salt), "Ygy_4c=r#e#4EX^NUGUc5")
+	bv := utils.Md5encrypt("5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36")
+	sign := utils.Md5encrypt("fanyideskweb", word, fmt.Sprint(salt), "Ygy_4c=r#e#4EX^NUGUc5")
 	dataStr := fmt.Sprintf(
 		"i=%v&from=en&to=zh-CHS&smartresult=dict&client=fanyideskweb&salt=%v&sign=%v&lts=%v&bv=%v&doctype=json&version=2.1&keyfrom=fanyi.web&action=FY_BY_CLICKBUTTION",
 		word, salt, sign, lts, bv,
@@ -64,19 +65,19 @@ func youdaoTranslate(word string) {
 		log.Fatal(err)
 	}
 	if resp.StatusCode != 200 {
-		log.Fatal("bad StatusCode: ", resp.StatusCode, " body", string(bodyText))
+		log.Fatal("bad StatusCode: ", resp.StatusCode, "body", string(bodyText))
 	}
 
-	res := ResponseBody{}
+	respBody := ResponseBody{}
 
-	err = json.Unmarshal(bodyText, &res)
+	err = json.Unmarshal(bodyText, &respBody)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("========youdao=========")
 	fmt.Println(word)
-	entires := res.SmartResult.Entries
+	entires := respBody.SmartResult.Entries
 	for _, v := range entires {
 		fmt.Print(v)
 	}

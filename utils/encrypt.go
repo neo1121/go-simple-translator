@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"crypto/md5"
@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func md5encrypt(s ...string) string {
+func Md5encrypt(s ...string) string {
 	h := md5.New()
 	for _, v := range s {
 		io.WriteString(h, v)
