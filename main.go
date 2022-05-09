@@ -1,19 +1,41 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // TODO:
 // [x] 1. send a HTTP request
+// [x] 2. resolve the request
+
+func encrypt(s ...string) string {
+	h := md5.New()
+	for _, v := range s {
+		io.WriteString(h, v)
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
 
 func main() {
+	word := "what"
+	salt := time.Now().UnixMilli()
+	lts := salt / 10
+	bv := encrypt("5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36")
+	sign := encrypt("fanyideskweb", word, fmt.Sprint(salt), "Ygy_4c=r#e#4EX^NUGUc5")
+	dataStr := fmt.Sprintf(
+		"i=%v&from=en&to=zh-CHS&smartresult=dict&client=fanyideskweb&salt=%v&sign=%v&lts=%v&bv=%v&doctype=json&version=2.1&keyfrom=fanyi.web&action=FY_BY_CLICKBUTTION",
+		word, salt, sign, lts, bv,
+	)
+
 	client := &http.Client{}
-	var data = strings.NewReader(`i=hello&from=en&to=zh-CHS&smartresult=dict&client=fanyideskweb&salt=16520888719980&sign=e0982c1b72361100301ddc7c504f0d07&lts=1652088871998&bv=a6a7eab4afbf9b019ca15a461e45e966&doctype=json&version=2.1&keyfrom=fanyi.web&action=FY_BY_CLICKBUTTION`)
+	var data = strings.NewReader(dataStr)
 	req, err := http.NewRequest("POST", "https://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule", data)
 	if err != nil {
 		log.Fatal(err)
