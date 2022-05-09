@@ -6,7 +6,6 @@ import (
 	"simple-translate/caiyun"
 	"simple-translate/youdao"
 	"sync"
-	"time"
 )
 
 // TODO:
@@ -20,10 +19,11 @@ func Translate(word string, translateFunc func(string), wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		startTime := time.Now().UnixMilli()
+		// timer := utils.Timer{}
+		// defer timer.Close()
+		// timer.Start()
 		translateFunc(word)
-		endTime := time.Now().UnixMilli()
-		fmt.Println("耗时:", endTime-startTime, "ms")
+		// fmt.Println("耗时:", timer.End(), "ms")
 	}()
 }
 
@@ -36,7 +36,13 @@ func main() {
 	}
 	word := os.Args[1]
 	wg := &sync.WaitGroup{}
+	// timer := utils.Timer{}
+	// defer timer.Close()
+	// timer.Start()
 	Translate(word, youdao.Translate, wg)
 	Translate(word, caiyun.Translate, wg)
 	wg.Wait()
+	// fmt.Println("=======================")
+	// fmt.Println("总耗时:", timer.End(), "ms")
+	// fmt.Println("=======================")
 }
