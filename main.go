@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,6 +15,7 @@ import (
 // TODO:
 // [x] 1. send a HTTP request
 // [x] 2. resolve the request
+// [x] 3. resolve the response
 
 func encrypt(s ...string) string {
 	h := md5.New()
@@ -21,6 +23,19 @@ func encrypt(s ...string) string {
 		io.WriteString(h, v)
 	}
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+type ResponseBody struct {
+	TranslateResult [][]struct {
+		Tgt string `json:"tgt"`
+		Src string `json:"src"`
+	} `json:"translateResult"`
+	ErrorCode   int    `json:"errorCode"`
+	Type        string `json:"type"`
+	SmartResult struct {
+		Entries []string `json:"entries"`
+		Type    int      `json:"type"`
+	} `json:"smartResult"`
 }
 
 func main() {
@@ -64,5 +79,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s\n", bodyText)
+	// fmt.Printf("%s\n", bodyText)
+
+	res := ResponseBody{}
+
+	err = json.Unmarshal(bodyText, &res)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%#v\n", res)
 }
